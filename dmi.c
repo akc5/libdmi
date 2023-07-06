@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "dmi.h"
 
 #define DMIMAX 100

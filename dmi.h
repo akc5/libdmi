@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
-
 /* single memory instance */
 typedef struct mi_s
 {
@@ -11,6 +8,7 @@ typedef struct mi_s
 	struct mi_s *next;
 } mi_t;
 
+/* base pointer of a 'type' to a linked list of memory instance */
 typedef struct dmi_s
 {
 	int micnt;
