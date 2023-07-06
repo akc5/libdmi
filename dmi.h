@@ -30,3 +30,9 @@ typedef struct dmi_s
  * @ size: size of memory requested.
  **/
 void* dmi_malloc(int type, size_t size);
+
+/*
+ * Allocate memory for dynamic memory instance array
+ * Each index of this array can be used to hold a dynamic memory instance of a type.
+ **/
+void* dmi_init(int dmitmax);

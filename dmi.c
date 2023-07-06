@@ -6,9 +6,9 @@
 
 typedef enum dmi_type_s
 {
-	DMIT_ONE,
-	DMIT_TWO,
-	DMIT_MAX
+	DMIT_RELOADABLE,
+	DMIT_NON_RELOADAABLE,
+	DMIT_MAX = DMIT_NON_RELOADABLE
 } dmi_type_t;
 
 
@@ -24,7 +24,7 @@ static void* _dmi_init(const int f_dmitmax)
         return dmis;
 }
 
-static void* dmi_init(int dmitmax)
+void* dmi_init(int dmitmax)
 {
         return _dmi_init(dmitmax);
 }
@@ -97,7 +97,7 @@ static void display_dmi(int type)
 
 void* dmi_malloc(int type, size_t size)
 {
-        // sanity checks on type and size
+        /* TODO: sanity checks on type and size */
         void *b = malloc(size);
         if (!b)
         {
@@ -111,13 +111,15 @@ void* dmi_malloc(int type, size_t size)
                 perror("calloc failure");
                 goto exit_fail_dmi_malloc;
         }
+		/* populate memory instance */
         mi->b = b;
         mi->size = size;
         mi->next = NULL;
 
+		/* add memory instance to list */
         if (_dmi_new(dmi, mi))
         {
-                printf("failed to add new dynamic memory instance\n");
+                printf("failed to add new dynamic memory instance of type: %d\n", type);
                 return NULL;
         }
         return b;
