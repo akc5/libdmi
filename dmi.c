@@ -95,7 +95,7 @@ static void display_dmi(int type)
         return;
 }
 
-static void* dmi_malloc(int type, size_t size)
+void* dmi_malloc(int type, size_t size)
 {
         // sanity checks on type and size
         void *b = malloc(size);
