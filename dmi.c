@@ -13,7 +13,6 @@ typedef enum dmi_type_s
 
 int dmitmax;
 dmi_t *dmis;
-FILE *fp = NULL;
 
 static void* _dmi_init(const int f_dmitmax)
 {
@@ -39,7 +38,6 @@ typedef int (*dmi_new_sanity_check)(int type, int cnt, int size);
  * */
 static int _dmi_new(dmi_t *dmi, mi_t *mi)
 {
-        mi_t *tmp;
         mi_t *head = dmi->milist;
         if (!dmi->milist)
         {
@@ -81,15 +79,14 @@ static int dmi_new(int type, int cnt, size_t size, dmi_new_sanity_check sccb)
 }
 */
 
-static void display_dmi(int type)
+void display_dmi(int type, FILE *fp)
 {
         dmi_t *dmi = &dmis[type];
         mi_t *head = dmi->milist;
         int cnt = dmi->micnt;
-        fprintf(fp, "type: %d, cnt: %d\n", type, dmi->micnt);
         while (cnt--)
         {
-                fprintf(fp, "size: %d, b: %p\n", head->size, head->b);
+				fprintf(fp, "type: %d, size: %d, b: %p\n", type, head->size, head->b);
                 head = head->next;
         }
         return;
@@ -109,7 +106,6 @@ static int _dmi_alloc(int type, size_t size, void *b)
 	mi->next = NULL;
 	if (_dmi_new(dmi, mi))
 	{
-		fprintf(fp, "failed to add new dynamic memory instance of type: %d, size: %lu\n", type, size);
 		free(mi);
 		mi = NULL;
 		return 1;
@@ -156,40 +152,3 @@ exit_fail_dmi_calloc:
 	return b;
 }
 
-static int init_logging(void)
-{
-	fp = stdout;
-	return 0;
-}
-
-int main(void)
-{
-	if (init_logging())
-	{
-		fprintf(stderr, "Error initializing logging.\n");
-		exit(1);
-	}
-	dmi_t *dmi = dmi_init(10);
-	if (!dmi)
-	{
-		fprintf(fp, "Error initializing dmi\n");
-		return 1;
-	}
-	/*
-	dmi_new(1, 10, sizeof(int), NULL);
-	dmi_new(1, 20, sizeof(int), NULL);
-	dmi_new(1, 30, sizeof(int), NULL);
-	display_dmi(1);
-	dmi_new(2, 10, sizeof(int), NULL);
-	dmi_new(3, 20, sizeof(int), NULL);
-	dmi_new(4, 30, sizeof(int), NULL);
-	display_dmi(2);
-	display_dmi(3);
-	display_dmi(4);
-	*/
-	void *b = dmi_malloc(2, 100); 
-	display_dmi(2);
-	b = dmi_calloc(3, 10, 300); 
-	display_dmi(3);
-	return 0;
-}

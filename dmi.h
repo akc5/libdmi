@@ -44,3 +44,5 @@ void* dmi_calloc(int type, int cnt, int size);
  * Each index of this array can be used to hold a dynamic memory instance of a type.
  **/
 void* dmi_init(int dmitmax);
+
+void display_dmi(int type, FILE *fp);
