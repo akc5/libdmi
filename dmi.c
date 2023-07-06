@@ -95,39 +95,66 @@ static void display_dmi(int type)
         return;
 }
 
+static int _dmi_alloc(int type, size_t size, void *b)
+{
+	dmi_t *dmi = &dmis[type];
+	mi_t *mi = calloc(1, sizeof(mi_t));
+	if (!mi)
+	{
+		perror("_dmi_alloc calloc failure");
+		return 1;
+	}
+	mi->b = b;
+	mi->size = size;
+	mi->next = NULL;
+	if (_dmi_new(dmi, mi))
+	{
+		fprintf(fp, "failed to add new dynamic memory instance of type: %d, size: %lu\n", type, size);
+		free(mi);
+		mi = NULL;
+		return 1;
+	}
+	return 0;
+}
+
 void* dmi_malloc(int type, size_t size)
 {
-        /* TODO: sanity checks on type and size */
-        void *b = malloc(size);
-        if (!b)
-        {
-                perror("malloc failure");
-                goto exit_fail_dmi_malloc;
-        }
-        dmi_t *dmi = &dmis[type];
-        mi_t *mi = calloc(1, sizeof(mi_t));
-        if (!mi)
-        {
-                perror("calloc failure");
-                goto exit_fail_dmi_malloc;
-        }
-		/* populate memory instance */
-        mi->b = b;
-        mi->size = size;
-        mi->next = NULL;
+	/* TODO: sanity checks on type and size */
+	void *b = malloc(size);
+	if (!b)
+	{
+		perror("malloc failure");
+		goto exit_fail_dmi_malloc;
+	}
 
-		/* add memory instance to list */
-        if (_dmi_new(dmi, mi))
-        {
-                fprintf(fp, "failed to add new dynamic memory instance of type: %d\n", type);
-                goto exit_fail_dmi_malloc;
-        }
-        return b;
+	if (_dmi_alloc(type, size, b))
+		goto exit_fail_dmi_malloc;
+	return b;
 
 exit_fail_dmi_malloc:
-        if (b) free(b);
-        if (mi) free(mi);
-        return NULL;
+	if (b) free(b);
+	b = NULL;
+	return b;
+}
+
+void* dmi_calloc(int type, int cnt, int size)
+{
+	/* TODO: sanity checks on type and size */
+	void *b = calloc(cnt, size);
+	if (!b)
+	{
+		perror("calloc failure");
+		goto exit_fail_dmi_calloc;
+		
+	}
+	if (_dmi_alloc(type, size * cnt, b))
+		goto exit_fail_dmi_calloc;
+	return b;
+
+exit_fail_dmi_calloc:
+	if (b) free(b);
+	b = NULL;
+	return b;
 }
 
 static int init_logging(void)
@@ -163,7 +190,7 @@ int main(void)
 	*/
 	void *b = dmi_malloc(2, 100); 
 	display_dmi(2);
-	b = dmi_malloc(3, 300); 
+	b = dmi_calloc(3, 10, 300); 
 	display_dmi(3);
 	return 0;
 }

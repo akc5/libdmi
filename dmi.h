@@ -32,6 +32,14 @@ typedef struct dmi_s
 void* dmi_malloc(int type, size_t size);
 
 /*
+ * Return a pointer to allocated memory.
+ * @ type: Type of dynamic memory instance.
+ * @ cnt: number of instance of size 'size', calloc style
+ * @ size: size of memory requested.
+ **/
+void* dmi_calloc(int type, int cnt, int size);
+
+/*
  * Allocate memory for dynamic memory instance array
  * Each index of this array can be used to hold a dynamic memory instance of a type.
  **/
