@@ -21,10 +21,12 @@ int main(void)
 	display_dmi(3);
 	display_dmi(4);
 	*/
-	void *b = dmi_malloc(2, 100); 
-	display_dmi(2, stdout);
-	b = dmi_calloc(3, 10, 300); 
-	display_dmi(3, stdout);
-	printf("b: %p\n", b);
+	for (int i = 0; i < 1000; i++)
+	{
+		volatile void *b = dmi_calloc(1, 10, 10);
+		if (!b)
+				printf("error\n");
+	}
+	display_dmi(1, stdout);
 	return 0;
 }
