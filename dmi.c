@@ -145,7 +145,6 @@ void* dmi_calloc(int type, int cnt, int size)
 	{
 		perror("calloc failure");
 		goto exit_fail_dmi_calloc;
-		
 	}
 	if (_dmi_alloc(type, size * cnt, b))
 		goto exit_fail_dmi_calloc;
