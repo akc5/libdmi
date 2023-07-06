@@ -1,2 +1,2 @@
 # libdmi
-A library to provide managed services around dynamic memory instances in C programming language
+A library to record dynamic memory instances in a linked list. 
