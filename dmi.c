@@ -43,8 +43,17 @@ static int _dmi_new(dmi_t *dmi, mi_t *mi)
         {
                 dmi->milist = mi;
                 dmi->micnt++;
+				dmi->last = dmi->milist;
                 return 0;
         }
+		if (dmi->last)
+		{
+			dmi->last->next = mi;
+			dmi->micnt++;
+			dmi->last = dmi->last->next;
+			return 0;
+		}
+		/* following code might not be required after introducing 'last' ptr but keeping it here in the meanwhile */
         while (head->next)
         {
                 head = head->next;
@@ -53,31 +62,6 @@ static int _dmi_new(dmi_t *dmi, mi_t *mi)
         dmi->micnt++;
         return 0;
 }
-/*
-static int dmi_new(int type, int cnt, size_t size, dmi_new_sanity_check sccb)
-{
-        if (!dmis)
-        {
-                printf("DMI not initialized\n");
-                return 1;
-        }
-        if (sccb && sccb(type, cnt, size))
-        {
-                printf("Sanity check failed\n");
-                return 1;
-        }
-        int idx = type;
-        dmi_t *dmi = &dmis[idx];
-        printf("adding mi at index: %d\n", idx);
-        mi_t *mi = calloc(1, sizeof(mi_t));
-        void *b = calloc(cnt, size);
-        mi->size = cnt * size;
-        mi->b = b;
-        mi->next = NULL;
-
-        return _dmi_new(dmi, mi);
-}
-*/
 
 void display_dmi(int type, FILE *fp)
 {

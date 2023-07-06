@@ -22,6 +22,7 @@ typedef struct dmi_s
 {
 	int micnt;
 	mi_t *milist;
+	mi_t *last;
 } dmi_t;
 
 /*
