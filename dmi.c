@@ -13,6 +13,7 @@ typedef enum dmi_type_s
 
 int dmitmax;
 dmi_t *dmis;
+FILE *fp = NULL;
 
 static void* _dmi_init(const int f_dmitmax)
 {
@@ -85,10 +86,10 @@ static void display_dmi(int type)
         dmi_t *dmi = &dmis[type];
         mi_t *head = dmi->milist;
         int cnt = dmi->micnt;
-        printf("type: %d, cnt: %d\n", type, dmi->micnt);
+        fprintf(fp, "type: %d, cnt: %d\n", type, dmi->micnt);
         while (cnt--)
         {
-                printf("size: %d, b: %p\n", head->size, head->b);
+                fprintf(fp, "size: %d, b: %p\n", head->size, head->b);
                 head = head->next;
         }
         return;
@@ -118,8 +119,8 @@ void* dmi_malloc(int type, size_t size)
 		/* add memory instance to list */
         if (_dmi_new(dmi, mi))
         {
-                printf("failed to add new dynamic memory instance of type: %d\n", type);
-                return NULL;
+                fprintf(fp, "failed to add new dynamic memory instance of type: %d\n", type);
+                goto exit_fail_dmi_malloc;
         }
         return b;
 
@@ -129,12 +130,23 @@ exit_fail_dmi_malloc:
         return NULL;
 }
 
+static int init_logging(void)
+{
+	fp = stdout;
+	return 0;
+}
+
 int main(void)
 {
+	if (init_logging())
+	{
+		fprintf(stderr, "Error initializing logging.\n");
+		exit(1);
+	}
 	dmi_t *dmi = dmi_init(10);
 	if (!dmi)
 	{
-		printf("Error initializing dmi\n");
+		fprintf(fp, "Error initializing dmi\n");
 		return 1;
 	}
 	/*
