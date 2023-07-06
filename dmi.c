@@ -7,10 +7,9 @@
 typedef enum dmi_type_s
 {
 	DMIT_RELOADABLE,
-	DMIT_NON_RELOADAABLE,
+	DMIT_NON_RELOADABLE,
 	DMIT_MAX = DMIT_NON_RELOADABLE
 } dmi_type_t;
-
 
 int dmitmax;
 dmi_t *dmis;
@@ -152,5 +151,7 @@ int main(void)
 	*/
 	void *b = dmi_malloc(2, 100); 
 	display_dmi(2);
+	b = dmi_malloc(3, 300); 
+	display_dmi(3);
 	return 0;
 }
