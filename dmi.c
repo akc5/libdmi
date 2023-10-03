@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "dmi.h"
 
 #define DMIMAX 100
@@ -23,22 +24,21 @@ static void* _dmi_init(const int f_dmitmax)
         return dmis;
 }
 
+/**
+ * Initialize maximum number of dynamic memory instances that
+ * need to be recored
+ */
 void* dmi_init(int dmitmax)
 {
         return _dmi_init(dmitmax);
 }
 
-/* Not used anymore, was needed for dmi_new()
-typedef int (*dmi_new_sanity_check)(int type, int cnt, int size);
-*/
-
-/*
+/**
  * @dmi: base pointer of instance type
  * @mi: memory instance to be added
- * */
+ */
 static int _dmi_new(dmi_t *dmi, mi_t *mi)
 {
-        mi_t *head = dmi->milist;
         if (!dmi->milist)
         {
                 dmi->milist = mi;
@@ -53,14 +53,7 @@ static int _dmi_new(dmi_t *dmi, mi_t *mi)
 			dmi->last = dmi->last->next;
 			return 0;
 		}
-		/* following code might not be required after introducing 'last' ptr but keeping it here in the meanwhile */
-        while (head->next)
-        {
-                head = head->next;
-        }
-        head->next = mi;
-        dmi->micnt++;
-        return 0;
+        return 1;
 }
 
 void display_dmi(int type, FILE *fp)
@@ -68,6 +61,7 @@ void display_dmi(int type, FILE *fp)
         dmi_t *dmi = &dmis[type];
         mi_t *head = dmi->milist;
         int cnt = dmi->micnt;
+		printf("Displaying dmis at %p, cnt: %d\n", dmi, dmi->micnt);
         while (cnt--)
         {
 				fprintf(fp, "type: %d, size: %d, b: %p\n", type, head->size, head->b);
@@ -76,13 +70,13 @@ void display_dmi(int type, FILE *fp)
         return;
 }
 
-static int _dmi_alloc(int type, size_t size, void *b)
+static int _dmi_record(int type, size_t size, void *b)
 {
 	dmi_t *dmi = &dmis[type];
 	mi_t *mi = calloc(1, sizeof(mi_t));
 	if (!mi)
 	{
-		perror("_dmi_alloc calloc failure");
+		perror("_dmi_record calloc failure");
 		return 1;
 	}
 	mi->b = b;
@@ -107,7 +101,7 @@ void* dmi_malloc(int type, size_t size)
 		goto exit_fail_dmi_malloc;
 	}
 
-	if (_dmi_alloc(type, size, b))
+	if (_dmi_record(type, size, b))
 		goto exit_fail_dmi_malloc;
 	return b;
 
@@ -126,7 +120,7 @@ void* dmi_calloc(int type, int cnt, int size)
 		perror("calloc failure");
 		goto exit_fail_dmi_calloc;
 	}
-	if (_dmi_alloc(type, size * cnt, b))
+	if (_dmi_record(type, size * cnt, b))
 		goto exit_fail_dmi_calloc;
 	return b;
 
@@ -136,3 +130,30 @@ exit_fail_dmi_calloc:
 	return b;
 }
 
+int _dmi_free(mi_t *milist, int micnt)
+{
+	int i;
+	mi_t *head = milist; 
+	printf("free mi instances at %p, cnt: %d\n", milist, micnt);
+	sleep(5);
+	for (i = 0; i < micnt; i++)
+	{
+		mi_t *next = head->next;
+		printf("free mi a %p\n", head->b);
+		free(head->b);
+		head->size = 0;
+		head->next = NULL;
+		free(head);
+		head = next;
+	}
+	return 0;
+}
+
+int dmi_free(int type)
+{
+	dmi_t *dmi = &dmis[type];
+	_dmi_free(dmi->milist, dmi->micnt);
+	dmi->milist = NULL;
+	dmi->micnt = 0;
+	return 0;
+}
