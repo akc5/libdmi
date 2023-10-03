@@ -12,15 +12,22 @@ typedef enum dmi_type_s
 	DMIT_MAX = DMIT_NON_RELOADABLE
 } dmi_type_t;
 
-int dmitmax;
-dmi_t *dmis;
+/* maximum number of dmi types supported */
+static int dmitmax;
+/* array of dmi types */
+static dmi_t *dmis;
 
 static void* _dmi_init(const int f_dmitmax)
 {
         dmitmax = f_dmitmax;
-        if (!dmitmax || (dmitmax < 0))
-                return NULL;
+        if (dmitmax <= 0)
+		{
+			printf("Invalid max dmi type value. Init failure.\n");
+			return NULL;
+		}
         dmis = calloc(dmitmax, sizeof(dmi_t));
+		if (!dmis)
+			perror("calloc");
         return dmis;
 }
 
@@ -53,6 +60,7 @@ static int _dmi_new(dmi_t *dmi, mi_t *mi)
 			dmi->last = dmi->last->next;
 			return 0;
 		}
+		printf("Error occured while recording new dmi\n");
         return 1;
 }
 
@@ -106,8 +114,7 @@ void* dmi_malloc(int type, size_t size)
 	return b;
 
 exit_fail_dmi_malloc:
-	if (b) free(b);
-	b = NULL;
+	if (b) free(b); b = NULL;
 	return b;
 }
 
@@ -130,12 +137,10 @@ exit_fail_dmi_calloc:
 	return b;
 }
 
-int _dmi_free(mi_t *milist, int micnt)
+void _dmi_free(mi_t *milist, int micnt)
 {
 	int i;
 	mi_t *head = milist; 
-	printf("free mi instances at %p, cnt: %d\n", milist, micnt);
-	sleep(5);
 	for (i = 0; i < micnt; i++)
 	{
 		mi_t *next = head->next;
@@ -149,11 +154,10 @@ int _dmi_free(mi_t *milist, int micnt)
 	return 0;
 }
 
-int dmi_free(int type)
+void dmi_free(int type)
 {
 	dmi_t *dmi = &dmis[type];
 	_dmi_free(dmi->milist, dmi->micnt);
 	dmi->milist = NULL;
 	dmi->micnt = 0;
-	return 0;
 }

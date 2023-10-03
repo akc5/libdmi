@@ -47,4 +47,5 @@ void* dmi_calloc(int type, int cnt, int size);
 void* dmi_init(int dmitmax);
 
 void display_dmi(int type, FILE *fp);
-int dmi_free(int type);
+void dmi_free(int type);
+
