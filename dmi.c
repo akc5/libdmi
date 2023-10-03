@@ -41,6 +41,7 @@ void* dmi_init(int dmitmax)
 }
 
 /**
+ * Add the new memory instance to the linked list of its type
  * @dmi: base pointer of instance type
  * @mi: memory instance to be added
  */
@@ -78,6 +79,9 @@ void display_dmi(int type, FILE *fp)
         return;
 }
 
+/**
+ * Allocate a new memory instance, populate it with required values and record it
+ */
 static int _dmi_record(int type, size_t size, void *b)
 {
 	dmi_t *dmi = &dmis[type];
@@ -114,7 +118,8 @@ void* dmi_malloc(int type, size_t size)
 	return b;
 
 exit_fail_dmi_malloc:
-	if (b) free(b); b = NULL;
+	if (b) free(b);
+	b = NULL;
 	return b;
 }
 
@@ -137,27 +142,27 @@ exit_fail_dmi_calloc:
 	return b;
 }
 
-void _dmi_free(mi_t *milist, int micnt)
+static void _dmi_free(int type)
 {
 	int i;
-	mi_t *head = milist; 
+	dmi_t *dmi = &dmis[type];
+	mi_t *head = dmi->milist; 
+	int micnt = dmi->micnt;
+	/* free direction - first to last */
 	for (i = 0; i < micnt; i++)
 	{
 		mi_t *next = head->next;
-		printf("free mi a %p\n", head->b);
+		if (!next) break;
 		free(head->b);
 		head->size = 0;
 		head->next = NULL;
 		free(head);
 		head = next;
 	}
-	return 0;
+	dmi->micnt -= micnt;
 }
 
 void dmi_free(int type)
 {
-	dmi_t *dmi = &dmis[type];
-	_dmi_free(dmi->milist, dmi->micnt);
-	dmi->milist = NULL;
-	dmi->micnt = 0;
+	_dmi_free(type);
 }

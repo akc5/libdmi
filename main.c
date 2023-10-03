@@ -21,7 +21,7 @@ int main(void)
 	display_dmi(3);
 	display_dmi(4);
 	*/
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		volatile void *b = dmi_calloc(1, 10, 10);
 		if (!b)
@@ -29,7 +29,7 @@ int main(void)
 	}
 	display_dmi(1, stdout);
 	dmi_free(1);
-	printf("================================================================================================");
+	printf("================================================================================================\n");
 	display_dmi(1, stdout);
 	return 0;
 }
