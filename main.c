@@ -27,9 +27,14 @@ int main(void)
 		if (!b)
 				printf("error\n");
 	}
-	display_dmi(1, stdout);
 	dmi_free(1);
-	printf("================================================================================================\n");
+	for (int i = 0; i < 100; i++)
+	{
+		volatile void *b = dmi_calloc(1, 10, 10);
+		if (!b)
+				printf("error\n");
+	}
+	dmi_free(1);
 	display_dmi(1, stdout);
 	return 0;
 }
