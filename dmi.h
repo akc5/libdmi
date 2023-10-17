@@ -20,9 +20,18 @@ typedef struct mi_s
  **/
 typedef struct dmi_s
 {
+	/* current number of memory instances recorded in memory */
 	int micnt;
 	mi_t *milist;
 	mi_t *last;
+	/* total memory instance record requests for a given type */
+	long unsigned int mi_alloc_count;
+	/* total memory instance record size for a given type */
+	long unsigned int mi_alloc_tsz;
+	/* total memory instance free request for a given type */
+	long unsigned int mi_free_count;
+	/* total memory instance free size for a given type */
+	long unsigned int mi_free_tsz;
 } dmi_t;
 
 /*
