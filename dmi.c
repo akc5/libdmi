@@ -70,12 +70,15 @@ void display_dmi(int type, FILE *fp)
         dmi_t *dmi = &dmis[type];
         mi_t *head = dmi->milist;
         int cnt = dmi->micnt;
+		/*
 		printf("Displaying dmis at %p, cnt: %d\n", dmi, dmi->micnt);
         while (cnt--)
         {
 				fprintf(fp, "type: %d, size: %d, b: %p\n", type, head->size, head->b);
                 head = head->next;
         }
+		*/
+		printf("================================================================================================\n");
 		printf("Type: %d, total alloc count: %lu, total alloc size: %lu\n", type, dmi->mi_alloc_count, dmi->mi_alloc_tsz);
 		printf("Type: %d, total free count: %lu, total free size: %lu\n", type, dmi->mi_free_count, dmi->mi_free_tsz);
         return;
@@ -153,6 +156,7 @@ static void _dmi_free(int type)
 	mi_t *head = dmi->milist; 
 	int micnt = dmi->micnt;
 	/* free direction - first to last */
+	if (!head) return;
 	while (head)
 	{
 		mi_t *next = head->next;
@@ -166,6 +170,7 @@ static void _dmi_free(int type)
 		head = next;
 	}
 	dmi->micnt -= micnt;
+	dmi->milist = NULL;
 }
 
 void dmi_free(int type)
