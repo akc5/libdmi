@@ -56,5 +56,6 @@ void* dmi_calloc(int type, int cnt, int size);
 void* dmi_init(int dmitmax);
 
 void display_dmi(int type, FILE *fp);
-void dmi_free(int type);
+typedef int (*data_cmp_cb)(void *d1, void *d2);
+void dmi_free(int type, void *data, data_cmp_cb cb);
 
