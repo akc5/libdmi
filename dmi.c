@@ -68,9 +68,9 @@ static int _dmi_new(dmi_t *dmi, mi_t *mi)
 void display_dmi(int type, FILE *fp)
 {
         dmi_t *dmi = &dmis[type];
+		/*
         mi_t *head = dmi->milist;
         int cnt = dmi->micnt;
-		/*
 		printf("Displaying dmis at %p, cnt: %d\n", dmi, dmi->micnt);
         while (cnt--)
         {
@@ -151,7 +151,7 @@ exit_fail_dmi_calloc:
 
 static void _dmi_free(int type)
 {
-	int i;
+	//int i;
 	dmi_t *dmi = &dmis[type];
 	mi_t *head = dmi->milist; 
 	int micnt = dmi->micnt;
@@ -173,7 +173,64 @@ static void _dmi_free(int type)
 	dmi->milist = NULL;
 }
 
-void dmi_free(int type)
+static inline void* _get_dmi_by_type(int type)
 {
-	_dmi_free(type);
+	dmi_t *dmi = &dmis[type];
+	return dmi;
+}
+
+static int _mi_free_spec(mi_t *head, void *d, data_cmp_cb cb)
+{
+	mi_t *prev = head;
+	int micnt = 0;
+	while (head)
+	{
+		mi_t *next = head->next;
+		prev = head;
+		if (!cb(head->b, d))
+		{
+			prev->next = head->next;
+			free(head->b);
+			head->b = NULL;
+			free(head);
+			head = NULL;
+			printf("Record deleted.\n");
+		}
+		head = next;
+	}
+	return 0;
+}
+
+static void _dmi_free_spec(int type, void *d, data_cmp_cb cb)
+{
+	dmi_t *dmi = _get_dmi_by_type(type);
+	mi_t *head = dmi->milist;
+	mi_t *prev = NULL;
+	int micnt = 0;
+
+	/* TODO: sanity checks on data poniter */
+	while (head)
+	{
+		mi_t *next = head->next;
+		prev = head;
+		if (!cb(head->b, d))	
+		{
+			free(head->b);
+			free(head);
+			head->b = NULL;
+			head = NULL;
+			dmi->mi_free_count++;
+			dmi->mi_free_tsz += head->size;
+			micnt++;
+		}
+			if (prev) prev->next = next;
+			head = next;
+	}
+	dmi->micnt -= micnt;
+	return;
+}
+
+void dmi_free(int type, void *d, data_cmp_cb cb)
+{
+	d ? _dmi_free_spec(type, d, cb) : _dmi_free(type);
 }
