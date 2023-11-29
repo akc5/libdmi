@@ -1,5 +1,13 @@
 #pragma once
 
+typedef enum dmi_type_s
+{
+	DMIT_RELOADABLE,
+	DMIT_NON_RELOADABLE,
+	DMIT_MAX = DMIT_NON_RELOADABLE
+} dmi_type_t;
+
+
 /*
  * mi_t: a single dynamic memory instance
  * @ size: size of the instance
@@ -20,6 +28,8 @@ typedef struct mi_s
  **/
 typedef struct dmi_s
 {
+	/* maximum number of memory instances that can be allocated */
+	int maxmicnt;
 	/* current number of memory instances recorded in memory */
 	int micnt;
 	mi_t *milist;

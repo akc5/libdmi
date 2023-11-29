@@ -5,13 +5,6 @@
 
 #define DMIMAX 100
 
-typedef enum dmi_type_s
-{
-	DMIT_RELOADABLE,
-	DMIT_NON_RELOADABLE,
-	DMIT_MAX = DMIT_NON_RELOADABLE
-} dmi_type_t;
-
 /* maximum number of dmi types supported */
 static int dmitmax;
 /* array of dmi types */
@@ -28,6 +21,8 @@ static void* _dmi_init(const int f_dmitmax)
         dmis = calloc(dmitmax, sizeof(dmi_t));
 		if (!dmis)
 			perror("calloc");
+		dmis->maxmicnt = dmitmax;
+		printf("Allocated space for %d dmis\n", dmis->maxmicnt);
         return dmis;
 }
 
@@ -78,9 +73,10 @@ void display_dmi(int type, FILE *fp)
                 head = head->next;
         }
 		*/
-		printf("================================================================================================\n");
+		printf("display dmi ====================================================================================\n");
 		printf("Type: %d, total alloc count: %lu, total alloc size: %lu\n", type, dmi->mi_alloc_count, dmi->mi_alloc_tsz);
 		printf("Type: %d, total free count: %lu, total free size: %lu\n", type, dmi->mi_free_count, dmi->mi_free_tsz);
+		printf("\n");
         return;
 }
 

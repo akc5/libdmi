@@ -1,8 +1,16 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include "dmi.h"
+#include <jansson.h>
+#include <signal.h>
 
-typedef struct data_s
+/*
+ * Iterate over json config
+ *
+ * */
+
+typedef struct __attribute__((__packed__)) data_s 
 {
 	int a;
 	int b;
@@ -16,62 +24,34 @@ int data_cmp(void *d1, void *d2)
 	return memcmp(d1, d2, sizeof(data_t));	
 }
 
+void sighup_cb(int arg)
+{
+	printf("SIGHUP called\n");
+}
+
 int main(void)
 {
-	dmi_t *dmi = dmi_init(10);
+	dmi_type_t type = DMIT_RELOADABLE;
+	dmi_t *dmi = dmi_init(DMIT_MAX);
 	if (!dmi)
 	{
 		fprintf(stderr, "Error initializing dmi\n");
 		return 1;
 	}
+	printf("DMI size: %ld\n", sizeof(data_t));
 	for (int i = 0; i < 100; i++)
 	{
-		volatile void *b = dmi_calloc(1, 10, sizeof(data_t));
+		volatile void *b = dmi_calloc(type, 10, sizeof(data_t));
 		if (!b)
-				printf("error\n");
-	}
-	printf("check 1\n");
-	/* free all instances of type 1 */
-	dmi_free(1, NULL, NULL);
-	printf("check 2\n");
-	data_t d = {1,2,'C'};
-	data_t d1 = {12, 2,'C'};
-	data_t d2 = {5, 5, 'D'};
-	int cnt = 0;
-	volatile void *b = dmi_calloc(1, 10, sizeof(data_t));
-	if (!b)
-			printf("error\n");
-	memcpy((void *)b, &d, sizeof(data_t));
-	volatile void *b1 = dmi_calloc(1, 10, sizeof(data_t));
-	if (!b1)
-			printf("error\n");
-	memcpy((void *)b1, &d1, sizeof(data_t));
-	volatile void *b2 = dmi_calloc(1, 10, sizeof(data_t));
-	if (!b2)
-			printf("error\n");
-	memcpy((void *)b2, &d2, sizeof(data_t));
-	/*
-	for (int i = 0; i < 100; i++)
-	{
-		volatile void *b = dmi_calloc(1, 10, sizeof(data_t));
-		if (!b)
-				printf("error\n");
-		if (!cnt)
 		{
-			memcpy((void *)b, &d1, sizeof(data_t));
-			cnt++;
+				perror("calloc\n");
+				return 1;
 		}
-		else
-			memcpy((void *)b, &d, sizeof(data_t));
 	}
-	*/
-	//printf("check 3, cnt: %d\n", cnt);
-	/* populate some of these instances */
-	/* free a specific instance of type 1 */
-	dmi_free(1, NULL, NULL);
-	//dmi_free(1, &d2, data_cmp);
-	printf("check 4\n");
-	display_dmi(1, stdout);
-	printf("check 5\n");
+	display_dmi(type, stdout);
+	/* free all instances of type 1 */
+	printf("Free dmi instances for type %d\n\n", type);
+	dmi_free(type, NULL, NULL);
+	display_dmi(type, stdout);
 	return 0;
 }
